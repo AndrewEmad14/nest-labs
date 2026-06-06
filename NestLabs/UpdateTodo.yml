@@ -16,7 +16,7 @@ http:
       {
 
        
-        "status": "in progress"
+        "status": "in-progress"
       }
   auth: inherit
 

@@ -1,58 +1,46 @@
 import {
-  BadRequestException,
-  Body,
   Controller,
-  Delete,
   Get,
-  NotFoundException,
-  Param,
-  Patch,
   Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
-import type { Todo } from './todo.type';
 import { TodosService } from './todos.service';
+import { CreateTodoDto } from './dto/create-todo.dto';
+import { UpdateTodoDto } from './dto/update-todo.dto';
+
 @Controller('todos')
 export class TodosController {
-  constructor(private todosService: TodosService) {}
-  @Get()
-  getAllTodos(): Todo[] {
-    return this.todosService.getAllTodos();
-  }
-  @Get(':id')
-  getTodoById(@Param('id') id: number): Todo | string {
-    const todo = this.todosService.getTodoById(+id);
-    if (todo) {
-      return todo;
-    }
-    throw new NotFoundException('no todo found');
-  }
+  constructor(private readonly todosService: TodosService) {}
+
   @Post()
-  createTodo(
-    @Body() body: { task: string; status: 'todo' | 'in-progress' | 'done' },
-  ): Todo | string {
-    const createdTodo = this.todosService.createTodo(body);
-    if (createdTodo) {
-      return createdTodo;
-    }
-    throw new BadRequestException('failed to create todo');
+  create(@Body() createTodoDto: CreateTodoDto) {
+    return this.todosService.create(createTodoDto);
   }
+
+  @Get()
+  findAll() {
+    return this.todosService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.todosService.findOne(id);
+  }
+
   @Patch(':id')
-  updateTodo(
-    @Body() body: { task?: string; status?: 'todo' | 'in-progress' | 'done' },
-    @Param('id') id: number,
-  ): Todo | string {
-    const updatedTodo = this.todosService.updateTodo(body, +id);
-    if (updatedTodo) {
-      return updatedTodo;
-    }
-    throw new BadRequestException('bad request');
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateTodoDto: UpdateTodoDto,
+  ) {
+    return this.todosService.update(id, updateTodoDto);
   }
+
   @Delete(':id')
-  deleteTodo(@Param('id') id: number): Todo | string {
-    const deletedTodo = this.todosService.deleteTodoById(+id);
-    if (deletedTodo) {
-      return deletedTodo;
-    }
-    throw new NotFoundException('no todo found');
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.todosService.remove(id);
   }
 }
